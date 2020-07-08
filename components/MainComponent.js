@@ -13,6 +13,8 @@ import {Icon} from 'react-native-elements'
 import {connect} from 'react-redux'
 import {baseUrl} from '../shared/baseUrl'
 import {fetchComments,fetchDishes,fetchLeaders,fetchPromos} from '../redux/ActionCreators'
+import Reservation from './ReservationComponent';
+
 
 const mapStateToProps=(state)=>{
     return{dishes: state.dishes,
@@ -27,9 +29,26 @@ const mapDispatchToProps = dispatch => ({
     fetchLeaders: () => dispatch(fetchLeaders()),
   })
 
+const ReservationNavigator = createStackNavigator({
+    Reservation: { screen: Reservation }
+  }, {
+    navigationOptions: ({ navigation }) => ({
+      headerStyle: {
+          backgroundColor: "#512DA8"
+      },
+      headerTitleStyle: {
+          color: "#fff"            
+      },
+      headerTintColor: "#fff",
+      headerLeft: <Icon name="menu" size={24}
+        iconStyle={{ color: 'white' }} 
+        onPress={ () => navigation.navigate('DrawerToggle') } />    
+    })
+  })  
+
 const MenuNavigator = createStackNavigator({
     Menu: { screen: Menu ,
-        defaultNavigationOptions:({navigation})=>({
+        navigationOptions:({navigation})=>({
         headerRight: () => (
             <Icon name="menu" size={24} 
               color= 'white'
@@ -39,7 +58,7 @@ const MenuNavigator = createStackNavigator({
 },Dish: { screen: Dishdetail }
 }, {
     initialRouteName: "Menu",
-    navigationOptions: {
+    defaultNavigationOptions:({navigation})=>({
         headerStyle:
         {
             backgroundColor: "#4b40ef",
@@ -48,7 +67,7 @@ const MenuNavigator = createStackNavigator({
         headerTitleStyle: {
             color: "#fff"
         }
-    }
+    })
 })
 
 const HomeNavigator = createStackNavigator({
@@ -184,6 +203,21 @@ const MainNavigator = createDrawerNavigator({
               )
         }
     },
+    Reservation:
+      { screen: ReservationNavigator,
+        navigationOptions: {
+          title: 'Reserve Table',
+          drawerLabel: 'Reserve Table',
+          drawerIcon: ({ tintColor, focused }) => (
+            <Icon
+              name='cutlery'
+              type='font-awesome'            
+              size={24}
+              iconStyle={{ color: tintColor }}
+            />
+          ),
+        }
+      }
     
 },
     {drawerBackgroundColor: '#D1C4E9',
@@ -196,7 +230,7 @@ const App = createAppContainer(MainNavigator);
 class Main extends Component {
 
     componentDidMount() {
-        console.log("not working")
+        console.log("not")
         this.props.fetchDishes();
         this.props.fetchComments();
         this.props.fetchPromos();

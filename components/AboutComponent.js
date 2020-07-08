@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
-import { View, Text } from 'react-native';
+import { ScrollView, Text } from 'react-native';
 import { Card } from 'react-native-elements';
 import { FlatList } from 'react-native-gesture-handler';
 import { ListItem } from 'react-native-elements';
 import {connect} from 'react-redux'
 import {baseUrl} from '../shared/baseUrl'
+import Loading from './LoadingComponent'
 
 const mapStateToProps=(state)=>{
     return {
@@ -28,9 +29,31 @@ class About extends Component {
                 />
             )
         }
-
+    if(this.props.leaders.isLoading){
         return(
-            <View>
+            <ScrollView>
+                    <History />
+                    <Card
+                        title='Corporate Leadership'>
+                        <Loading />
+                    </Card>
+                </ScrollView>
+        )
+    }
+    else if (this.props.leaders.errMess) {
+        return(
+            <ScrollView>
+                <History />
+                <Card
+                    title='Corporate Leadership'>
+                    <Text>{this.props.leaders.errMess}</Text>
+                </Card>
+            </ScrollView>
+        );
+    }
+    else{
+        return(
+            <ScrollView>
                <Card style={{marginBottom:4}} title="Our History" >
                   <Text>
                    Started in 2010, Ristorante con Fusion quickly established itself as a culinary icon par excellence in Hong Kong. With its unique brand of world fusion cuisine that can be found nowhere else, it enjoys patronage from the A-list clientele in Hong Kong.  Featuring four of the best three-star Michelin chefs in the world, you never know what will arrive on your plate the next time you visit us.
@@ -46,8 +69,11 @@ class About extends Component {
             />
        </Card>
            
-            </View >   
+            </ScrollView >   
            )
+        
+    }
+        
 
     }
     
