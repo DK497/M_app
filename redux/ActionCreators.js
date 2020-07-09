@@ -1,6 +1,49 @@
 import * as ActionTypes from './ActionTypes';
 import { baseUrl } from '../shared/baseUrl';
 
+export const postcomment=(dishId,rating,author,comment)=>(dispatch)=>{
+    console.log("heloo loser")
+    const newComment = {
+        dishId: dishId,
+        rating: rating,
+        author: author,
+        comment: comment
+    }
+    newComment.date=new Date().toISOString()
+    return fetch(baseUrl+'comments',{
+        method:'POST',
+        body:JSON.stringify(newComment),
+        headers:{
+            'Content-Type':'application/json'
+        },
+        credentials:'same-origin'
+    }).then(res=>{
+        if(res.ok)
+        {return res}
+        else {
+             var err=new Error('Error'+res.status+':'+res.statusText)
+             err.res=res
+              throw err
+             }
+             },err=>{
+            var errmss=new Error(err.message)
+            throw errmss
+            }).then(res=>res.json())
+            .then(com=>dispatch(addcomment(com)))
+            .catch(error=>{ console.log('post comments', error.message)
+            alert('Your comment could not be posted\nError: '+error.message) })
+}
+
+// function that creates action object and return plain JS objects
+export const addcomment=(comment)=>{   
+    return {
+        type:ActionTypes.COMMENT_ADD,
+        payload:comment
+        //data that is sent back
+    }
+}
+
+
 export const fetchComments = () => (dispatch) => {
     return fetch(baseUrl + 'comments')
     .then(response => {

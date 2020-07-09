@@ -230,7 +230,7 @@ const App = createAppContainer(MainNavigator);
 class Main extends Component {
 
     componentDidMount() {
-        console.log("not")
+        console.log("yo man")
         this.props.fetchDishes();
         this.props.fetchComments();
         this.props.fetchPromos();
