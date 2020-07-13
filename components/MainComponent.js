@@ -14,7 +14,7 @@ import {connect} from 'react-redux'
 import {baseUrl} from '../shared/baseUrl'
 import {fetchComments,fetchDishes,fetchLeaders,fetchPromos} from '../redux/ActionCreators'
 import Reservation from './ReservationComponent';
-
+import Favorites from './FavoriteComponent'
 
 const mapStateToProps=(state)=>{
     return{dishes: state.dishes,
@@ -29,10 +29,11 @@ const mapDispatchToProps = dispatch => ({
     fetchLeaders: () => dispatch(fetchLeaders()),
   })
 
-const ReservationNavigator = createStackNavigator({
-    Reservation: { screen: Reservation }
+
+const FavoritesNavigator = createStackNavigator({
+    Favorites: { screen: Favorites }
   }, {
-    navigationOptions: ({ navigation }) => ({
+    defaultNavigationOptions: ({ navigation }) => ({
       headerStyle: {
           backgroundColor: "#512DA8"
       },
@@ -40,9 +41,26 @@ const ReservationNavigator = createStackNavigator({
           color: "#fff"            
       },
       headerTintColor: "#fff",
-      headerLeft: <Icon name="menu" size={24}
+      headerRight:()=>(<Icon name="menu" size={24}
         iconStyle={{ color: 'white' }} 
-        onPress={ () => navigation.navigate('DrawerToggle') } />    
+        onPress={ () =>  navigation.toggleDrawer() } />)    
+    })
+  })
+
+const ReservationNavigator = createStackNavigator({
+    Reservation: { screen: Reservation }
+  }, {
+    defaultNavigationOptions: ({ navigation }) => ({
+      headerStyle: {
+          backgroundColor: "#512DA8"
+      },
+      headerTitleStyle: {
+          color: "#fff"            
+      },
+      headerTintColor: "#fff",
+      headerRight:()=> (<Icon name="menu" size={24}
+        iconStyle={{ color: 'white' }} 
+        onPress={ () => navigation.toggleDrawer() } />)    
     })
   })  
 
@@ -202,6 +220,21 @@ const MainNavigator = createDrawerNavigator({
                 />
               )
         }
+    },
+    Favorites:
+    { screen: FavoritesNavigator,
+      navigationOptions: {
+        title: 'My Favorites',
+        drawerLabel: 'My Favorites',
+        drawerIcon: ({ tintColor, focused }) => (
+          <Icon
+            name='heart'
+            type='font-awesome'            
+            size={24}
+            iconStyle={{ color: tintColor }}
+          />
+        ),
+      }
     },
     Reservation:
       { screen: ReservationNavigator,
