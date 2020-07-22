@@ -1,10 +1,6 @@
 import React from 'react';
-import {
-    ActivityIndicator,
-    StyleSheet,
-    Text,
-    View,
-  } from 'react-native'
+import {  ActivityIndicator,
+    StyleSheet, Text, View,} from 'react-native'
 
 const styles = StyleSheet.create({
     loadingView: {

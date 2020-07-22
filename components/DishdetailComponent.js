@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
-import { Text, View,FlatList,Modal,StyleSheet,Button } from 'react-native';
+import { Text, View,FlatList,Modal,StyleSheet,Button, Alert, PanResponder,Share} from 'react-native';
 import { Card, Icon ,Rating, Input} from 'react-native-elements';
 import { ScrollView } from 'react-native-gesture-handler';
 import {connect} from 'react-redux'
 import {baseUrl} from '../shared/baseUrl'
 import { postFavorite,postcomment } from '../redux/ActionCreators';
 import { set } from 'react-native-reanimated';
+import * as Animatable from 'react-native-animatable'
 
 const mapStateToProps = state => {
     return {
@@ -20,11 +21,64 @@ const mapStateToProps = state => {
 })
 
 function RenderDish(props) {
+  let view
+   const handleViewRef = ref => view = ref
+
+    const recognizeDrag = ({ moveX, moveY, dx, dy }) => {
+        if ( dx < -30 )
+            return true;
+        else
+            return false;
+    }
+    const panResponder = PanResponder.create({
+        onStartShouldSetPanResponder: (e, gestureState) => {
+            return true;
+        },
+        onPanResponderGrant: () => 
+        {
+           view.rubberBand(1000).
+                then(endState => console.log(endState.finished ? 'finished' : 'cancelled'))
+            },
+
+        onPanResponderEnd: (e, gestureState) => {
+            console.log("pan responder end", gestureState);
+            if (recognizeDrag(gestureState))
+            {console.log("right",recognizeDrag(gestureState))
+                Alert.alert(
+                    'Add Favorite',
+                    'Are you sure you wish to add ' + dish.name + ' to favorite?',
+                    [
+                    {text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
+                    {text: 'OK', onPress: () => {props.favorite ? console.log('Already favorite') : props.onPress()}},
+                    ],
+                    { cancelable: false }
+                )}
+             if (recognizeDrag(gestureState)===false){ 
+            
+                 props.tM()
+             }
+
+            return true;
+        }
+    })
+
+    const shareDish = (title, message, url) => {
+        Share.share({
+            title: title,
+            message: title + ': ' + message + ' ' + url,
+            url: url
+        },{
+            dialogTitle: 'Share ' + title
+        })
+    }
 
     const dish = props.dish;
     
         if (dish != null) {
             return(
+                <Animatable.View useNativeDriver={false} animation="fadeInDown" duration={2000} delay={1000}  
+                ref={handleViewRef}
+                {...panResponder.panHandlers}>
                 <Card
                 featuredTitle={dish.name}
                 image={{uri:baseUrl+dish.image}}>
@@ -38,9 +92,18 @@ function RenderDish(props) {
                       />
                     <Icon raised reverse name='pencil' type='font-awesome' color='#4b40ef'
                     onPress={props.tM} />
+                       <Icon
+                            raised
+                            reverse
+                            name='share'
+                            type='font-awesome'
+                            color='#51D2A8'
+                        
+                            onPress={() => shareDish(dish.name, dish.description, baseUrl + dish.image)} />
                     </View>
 
                 </Card>
+                </Animatable.View>
             );
         }
         else {
@@ -62,6 +125,7 @@ function RenderComments(props) {
     }
     
     return (
+        <Animatable.View animation="fadeInUp" duration={2000} delay={1000}>
         <Card title='Comments' >
         <FlatList 
             data={comments}
@@ -69,6 +133,7 @@ function RenderComments(props) {
             keyExtractor={item => item.id.toString()}
             />
         </Card>
+        </Animatable.View>
     );
 }
 

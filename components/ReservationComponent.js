@@ -1,7 +1,13 @@
 import React, { Component } from 'react';
-import { Text, View, ScrollView, StyleSheet, Picker, Switch, Button,Modal } from 'react-native';
+import { Text, View, ScrollView, StyleSheet, Picker, Switch, Button,Modal,Alert } from 'react-native';
 import { Card } from 'react-native-elements';
 import DtPicker from './DtPicker'
+
+import * as Animatable from 'react-native-animatable'
+import * as Permissions from 'expo-permissions'
+import { Notifications } from 'expo';
+
+
 
 class Reservation extends Component {
 
@@ -14,6 +20,9 @@ class Reservation extends Component {
             date:'',
             showModal: false
         }
+
+        this.obtainNotificationPermission = this.obtainNotificationPermission.bind(this);
+        this.presentLocalNotification = this.presentLocalNotification.bind(this);
     }
     toggleModal() {
         this.setState({showModal: !this.state.showModal});
@@ -23,6 +32,31 @@ class Reservation extends Component {
         console.log(JSON.stringify(this.state));
         this.toggleModal();
     }
+   handleAlert=()=>{
+       const {guests,smoking,date}=this.state
+    Alert.alert(
+        'Your Reservation OK?',
+        `No of guests:${guests}\nSmoking:${smoking}\nDAte and Time:${date}`,
+        [
+            { 
+                text: 'Cancel', 
+                onPress: () => this.resetForm(),
+                style: ' cancel'
+            },
+            {
+                text: 'OK',
+           
+                onPress: () => {
+                    this.presentLocalNotification(this.state.date) 
+                    console.log("noti")
+                    this.resetForm()}
+            }
+        ],
+        { cancelable: false }
+        // cancellable ensures that user presses a button to remove alert
+    )
+
+}
 
     resetForm() {
         this.setState({
@@ -36,15 +70,51 @@ class Reservation extends Component {
     static navigationOptions = {
         title: 'Reserve Table',
     };
+
+    
     datevalue=(value)=>{
         this.setState({ date:value })
     }
    
-    
+    async obtainNotificationPermission(){
+
+       let permission = await Permissions.getAsync(Permissions.NOTIFICATIONS);
+        if (permission.granted !==true) {
+            permission = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+            if (permission.granted !== true) {
+                Alert.alert('Permission not granted to show notifications');
+            }
+        }
+   
+        return (permission.granted)
+    }
+
+    async presentLocalNotification(date){
+       const k= await this.obtainNotificationPermission();
+    if(k){
+        Notifications.presentLocalNotificationAsync({
+            title: 'Your Reservation',
+            body: 'Reservation for '+ date + ' requested',
+            ios: {
+                sound: true
+            },
+            android: {
+                sound: true,
+                vibrate: true,
+                color: '#512DA8'
+            }
+        }).then((id)=>console.log("id:",id))
+        .catch((err)=>console.log(err))
+      
+    }  
+    }
+
     render() {
         
         return(
             <ScrollView>
+                {/* dont mind I used a different animation */}
+                <Animatable.View animation="flipInX" duration={2000} delay={1000}>
                 <View style={styles.formRow}>
                 <Text style={styles.formLabel}>Number of Guests</Text>
                 <Picker
@@ -75,12 +145,13 @@ class Reservation extends Component {
                 </View>
                 <View style={styles.formRow}>
                 <Button
-                    onPress={() => this.handleReservation()}
+                    onPress={() => this.handleAlert()}
                     title="Reserve"
                     color="#512DA8"
                     accessibilityLabel="Learn more about this purple button"
                     />
                 </View>
+                </Animatable.View>
                 <Modal animationType = {"slide"} transparent = {false}
                     visible = {this.state.showModal}
                     onDismiss = {() => this.toggleModal() }
